@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LINE OA Membership MVP
 
-## Getting Started
+MVP for 1-3 brands: LINE LIFF member registration, QR source attribution,
+basic coupon claims, tenant-aware admin dashboard, and member CSV export.
 
-First, run the development server:
+## Setup
+
+1. Copy `.env.example` to `.env` and update `DATABASE_URL` and `SESSION_SECRET`.
+2. Create a PostgreSQL database.
+3. Run:
 
 ```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`. Seeded local admin accounts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Role | Username | Password |
+| --- | --- | --- |
+| Super Admin | `admin` | `ChangeMe123!` |
+| Brand Admin | `brandadmin` | `ChangeMe123!` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Change both passwords before deploying.
 
-## Learn More
+## Admin login
 
-To learn more about Next.js, take a look at the following resources:
+The admin dashboard uses username and password authentication. Passwords are
+stored as bcrypt hashes. LINE Login remains dedicated to the LIFF member flow.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## LIFF configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+For local UI testing, leave `NEXT_PUBLIC_LIFF_ID` blank and set
+`ALLOW_DEMO_LIFF=true`. The QR source link can then be tested in a browser.
 
-## Deploy on Vercel
+For staging and production:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Create the LIFF app in LINE Developers.
+2. Use an HTTPS endpoint such as `https://member.example.com/liff/join`.
+3. Set `NEXT_PUBLIC_LIFF_ID`, `LINE_LIFF_CHANNEL_ID`, and `ALLOW_DEMO_LIFF=false`.
+4. Regenerate each QR source URL using its LIFF URL and source code.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The API verifies LINE ID tokens server-side before storing a member.
+
+## MVP boundaries
+
+- Each business record is scoped by `brandId`.
+- Brand admins only query their own tenant. Super admins query all brands.
+- Coupon claims use a short-lived signed member token.
+- Coupon redemption exists as an admin API endpoint.
+- CSV export respects the signed-in admin tenant.
+
+Before a production rollout, add PostgreSQL row-level security, rate limits,
+audit logs, MFA for super admins, and automated tenant-isolation
+tests.
