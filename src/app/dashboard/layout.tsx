@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { LanguageSwitch } from "@/components/language-switch";
 import { getDictionary } from "@/lib/i18n";
+import { LogoutButton } from "@/components/logout-button";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAdmin();
@@ -19,9 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="absolute bottom-5 left-5 right-5 rounded-2xl bg-white/10 p-4 text-xs text-emerald-100">
           <p className="font-semibold text-white">{session.name}</p>
           <p className="mt-1 flex items-center gap-1 opacity-70"><ShieldCheck size={13} /> {session.role.replace("_", " ")}</p>
-          <form action="/api/auth/logout" method="post">
-            <button className="mt-4 flex items-center gap-2 text-emerald-300 hover:text-white"><LogOut size={14} /> {dictionary.shell.signOut}</button>
-          </form>
+          <LogoutButton text={dictionary.shell.signOut} />
         </div>
       </aside>
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 px-5 py-4 backdrop-blur lg:hidden">
