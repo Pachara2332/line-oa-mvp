@@ -12,6 +12,20 @@ async function main() {
     create: { name: "Demo Brand", slug: "demo-brand" },
   });
 
+  const additionalBrands = [
+    { name: "Coffee Roasters", slug: "coffee-roasters" },
+    { name: "Healthy Eats", slug: "healthy-eats" },
+    { name: "Tech Gadgets", slug: "tech-gadgets" },
+  ];
+
+  for (const b of additionalBrands) {
+    await prisma.brand.upsert({
+      where: { slug: b.slug },
+      update: {},
+      create: { name: b.name, slug: b.slug },
+    });
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   await prisma.qrSource.upsert({
     where: { code: "DEMO-CAN-001" },

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { tenantWhere } from "@/lib/tenant";
@@ -6,6 +5,7 @@ import { PageHeading } from "@/components/page-heading";
 import { DataTable } from "@/components/data-table";
 import { CreatePanel, EntityActions } from "@/components/crud-controls";
 import { getDictionary } from "@/lib/i18n";
+import { QrCodeViewer } from "@/components/qr-code-viewer";
 
 export default async function QrSourcesPage() {
   const session = await requireAdmin();
@@ -28,7 +28,7 @@ export default async function QrSourcesPage() {
         { name: "code", label: "Source code", placeholder: "STORE_FRONT_01", required: true },
       ]} title={t.add} />
       <DataTable headers={["QR", "Source", "Brand", "Code", "Members", "LIFF Link", "Manage"]} rows={sources.map((source) => [
-        <Image alt={source.name} height={64} key={source.id} src={`/api/qr?text=${encodeURIComponent(source.qrUrl)}`} unoptimized width={64} />,
+        <QrCodeViewer key={`qr-${source.id}`} qrUrl={source.qrUrl} sourceName={source.name} code={source.code} />,
         <strong key={`${source.id}-name`}>{source.name}</strong>, source.brand.name, <code className="rounded bg-slate-100 px-2 py-1 text-xs" key={source.code}>{source.code}</code>, source._count.members,
         <a className="text-emerald-700 hover:underline" href={source.qrUrl} key={source.qrUrl} target="_blank">Open link</a>,
         <EntityActions endpoint={`/api/admin/qr-sources/${source.id}`} fields={[
